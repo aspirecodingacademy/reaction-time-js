@@ -17,191 +17,160 @@ const panelInstruction = document.getElementById("panel-instruction");
 const averageTime = document.getElementById("average-time");
 const reactionPercentile = document.getElementById("reaction-percentile");
 const reactionDescription = document.getElementById("reaction-description");
-const roundTimeElements = Array.from(
-  document.querySelectorAll("[data-round-time]"),
-);
+const bestTime = document.getElementById("best-time");
+const worstTime = document.getElementById("worst-time");
+const roundTimeElements = Array.from(document.querySelectorAll("[data-round-time]"));
+
+document.title = LAB_TITLE;
+document.querySelector("h1").textContent = LAB_TITLE;
+document.querySelector(".intro").textContent = READY_MESSAGE;
 
 let currentRound = 0;
-let isReady = false;
+let phase = "idle"; // "idle" | "waiting" | "ready" | "frozen"
 let startTime = 0;
 let results = [];
 let readyTimeoutId = null;
+let transitionTimeoutId = null;
 
-// ============================================================
-// HELPER FUNCTIONS (already done for you)
-// ============================================================
+function clearTimers() {
+    clearTimeout(readyTimeoutId);
+    clearTimeout(transitionTimeoutId);
+    readyTimeoutId = null;
+    transitionTimeoutId = null;
+}
 
 function formatMilliseconds(value) {
-  return `${Math.round(value)} ms`;
+    return `${Math.round(value)} ms`;
 }
 
 function calculatePercentile(time) {
-  const slope = -0.408333;
-  const intercept = 164.3333;
-  const percentile = slope * time + intercept;
-  return Math.round(Math.max(1, Math.min(99, percentile)));
+    const slope = -0.408333;
+    const intercept = 164.3333;
+    const percentile = slope * time + intercept;
+    return Math.round(Math.max(1, Math.min(99, percentile)));
 }
 
-function getReactionDescription(average) {
-  if (average < 180) return "You have elite reaction speed!";
-  if (average < 200) return "Dang. That was insane, you have lightning reflexes.";
-  if (average < 225) return "Very impressive.";
-  if (average < 275) return "Nice work, that was good focus.";
-  if (average < 300) return "Good job, that was solid work.";
-  if (average < 350) return "Not too shabby.";
-  return "Need a bit of practice, but you have potential.";
+function getReactionTime(start) {
+    return performance.now() - start;
 }
 
-// ============================================================
-// YOUR EXERCISES - Implement these functions!
-// ============================================================
-
-/**
- * TODO 7: Calculate the average of an array of times
- * @param {number[]} times - Array of reaction times in milliseconds
- * @returns {number} The average time
- *
- * Example: calculateAverage([200, 250, 220]) should return 223.33...
- *
- * Hint: Use a for loop to add up all the values, then divide by the length
- */
-function calculateAverage(times) {
-  // Your code here
-
-  return 0;
-}
-
-/**
- * TODO 8: Calculate how many milliseconds have passed since startTime
- * @param {number} startTime - The time when "TAP!" appeared (from performance.now())
- * @returns {number} Milliseconds elapsed since startTime
- *
- * Hint: Use performance.now() to get the current time, then subtract startTime
- */
-function getReactionTime(startTime) {
-  // Your code here
-
-  return 0;
-}
-
-/**
- * TODO 9: Update the results screen with the player's stats
- * @param {number} average - The average reaction time in milliseconds
- * @param {number[]} times - Array of individual round times
- *
- * You need to update these elements:
- * - averageTime.textContent = use formatMilliseconds(average)
- * - reactionPercentile.textContent = "Faster than X% of people." (use calculatePercentile)
- * - reactionDescription.textContent = use getReactionDescription(average)
- * - roundTimeElements[0], [1], [2] .textContent = use formatMilliseconds for each time
- */
 function updateResultsDisplay(average, times) {
-  // Your code here
-
+    averageTime.textContent = formatMilliseconds(average);
+    reactionPercentile.textContent = `Faster than ${calculatePercentile(average)}% of people.`;
+    reactionDescription.textContent = getReactionDescription(average);
+    bestTime.textContent = formatMilliseconds(getBestTime(times));
+    worstTime.textContent = formatMilliseconds(getWorstTime(times));
+    for (let i = 0; i < times.length; i++) {
+        roundTimeElements[i].textContent = formatMilliseconds(times[i]);
+    }
 }
 
 function setPanel(className, phaseText, instructionText) {
-  reactionPanel.className = `game-panel ${className}`;
-  panelPhase.textContent = phaseText;
-  panelInstruction.textContent = instructionText;
-  hudContent.textContent = currentRound === 0 ? "" : `Round ${currentRound} of ${TOTAL_ROUNDS}`;
+    reactionPanel.className = `game-panel ${className}`;
+    panelPhase.textContent = phaseText;
+    panelInstruction.textContent = instructionText;
+    hudContent.textContent = currentRound === 0 ? "" : `Round ${currentRound} of ${TOTAL_ROUNDS}`;
 }
 
 function startGame() {
-  startScreen.classList.add("hidden");
-  playingState.classList.remove("hidden");
-  document.body.classList.add("playing-mode");
-  currentRound = 0;
-  results = [];
-  startRound();
+    clearTimers();
+    startScreen.classList.add("hidden");
+    playingState.classList.remove("hidden");
+    document.body.classList.add("playing-mode");
+    currentRound = 0;
+    results = [];
+    startRound();
 }
 
+// Begins a brand-new round (advances the round counter).
 function startRound() {
-  currentRound += 1;
-  isReady = false;
-  setPanel("waiting", "WAIT", "");
+    currentRound += 1;
+    beginAttempt();
+}
 
-  const delay = WAIT_MIN_MS + Math.random() * WAIT_RANDOM_MS;
-
-  readyTimeoutId = setTimeout(() => {
-    isReady = true;
-    startTime = performance.now();
-    setPanel("ready", "TAP!", "");
-    readyTimeoutId = null;
-  }, delay);
+// Runs the WAIT -> TAP cycle for the current round. Called on a fresh
+// round AND on a retry after an early tap, so it must NOT touch currentRound.
+function beginAttempt() {
+    phase = "waiting";
+    setPanel("waiting", "WAIT", getRoundMessage(currentRound));
+    const delay = WAIT_MIN_MS + Math.random() * WAIT_RANDOM_MS;
+    readyTimeoutId = setTimeout(() => {
+        phase = "ready";
+        startTime = performance.now();
+        setPanel("ready", "TAP!", "");
+        readyTimeoutId = null;
+    }, delay);
 }
 
 function handlePanelClick() {
-  if (!isReady) {
-    clearTimeout(readyTimeoutId);
-    setPanel("early", "TOO SOON!", "Tap to retry");
-    setTimeout(() => startRound(), 1000);
-    return;
-  }
-
-  const reactionTime = getReactionTime(startTime);
-  results.push(reactionTime);
-
-  setPanel("result", formatMilliseconds(reactionTime), "");
-
-  setTimeout(() => {
-    if (currentRound < TOTAL_ROUNDS) {
-      startRound();
-    } else {
-      showResults();
+    // Tapped before green: penalize and retry the SAME round.
+    if (phase === "waiting") {
+        phase = "frozen";
+        clearTimers();
+        setPanel("early", "TOO SOON!", "Tap to retry");
+        transitionTimeoutId = setTimeout(beginAttempt, 1000);
+        return;
     }
-  }, 1500);
+
+    // Valid tap on green: record the time and advance.
+    if (phase === "ready") {
+        phase = "frozen";
+        const reactionTime = getReactionTime(startTime);
+        results.push(reactionTime);
+        setPanel("result", formatMilliseconds(reactionTime), "");
+        transitionTimeoutId = setTimeout(() => {
+            if (currentRound < TOTAL_ROUNDS) {
+                startRound();
+            } else {
+                showResults();
+            }
+        }, 1500);
+        return;
+    }
+
+    // phase is "frozen" or "idle": ignore clicks during transitions.
 }
 
 function showResults() {
-  const average = calculateAverage(results);
-  updateResultsDisplay(average, results);
-
-  playingState.classList.add("hidden");
-  resultsState.classList.remove("hidden");
-  document.body.classList.remove("playing-mode");
+    phase = "idle";
+    const average = calculateAverage(results);
+    updateResultsDisplay(average, results);
+    playingState.classList.add("hidden");
+    resultsState.classList.remove("hidden");
+    document.body.classList.remove("playing-mode");
 }
 
 function showStartScreen() {
-  resultsState.classList.add("hidden");
-  startScreen.classList.remove("hidden");
-  document.body.classList.remove("playing-mode");
-  currentRound = 0;
-  results = [];
+    clearTimers();
+    phase = "idle";
+    resultsState.classList.add("hidden");
+    startScreen.classList.remove("hidden");
+    document.body.classList.remove("playing-mode");
+    currentRound = 0;
+    results = [];
 }
 
-// Event listeners
 startButton.addEventListener("click", startGame);
 tryAgainButton.addEventListener("click", showStartScreen);
 reactionPanel.addEventListener("click", handlePanelClick);
 
 shareButton.addEventListener("click", async () => {
-  const average = results.reduce((sum, time) => sum + time, 0) / results.length;
-  const percentile = calculatePercentile(average);
-  const shareText = `My reaction time is ${formatMilliseconds(average)}. Faster than ${percentile}% of people! What's yours?`;
-
-  if (navigator.share) {
-    try {
-      await navigator.share({
-        title: "Reaction Lab",
-        text: shareText,
-        url: window.location.href,
-      });
-    } catch (error) {
-      if (error.name !== "AbortError") {
-        console.error("Share failed:", error);
-      }
+    const average = calculateAverage(results);
+    const percentile = calculatePercentile(average);
+    const shareText = `My reaction time is ${formatMilliseconds(average)}. Faster than ${percentile}% of people! What's yours?`;
+    if (navigator.share) {
+        try {
+            await navigator.share({ title: LAB_TITLE, text: shareText, url: window.location.href });
+        } catch (error) {
+            if (error.name !== "AbortError") console.error("Share failed:", error);
+        }
+        return;
     }
-    return;
-  }
-
-  try {
-    await navigator.clipboard.writeText(`${shareText} ${window.location.href}`);
-    shareButton.textContent = "Copied!";
-    setTimeout(() => {
-      shareButton.textContent = "Share";
-    }, 2000);
-  } catch (error) {
-    console.error("Failed to copy:", error);
-  }
+    try {
+        await navigator.clipboard.writeText(`${shareText} ${window.location.href}`);
+        shareButton.textContent = "Copied!";
+        setTimeout(() => { shareButton.textContent = "Share"; }, 2000);
+    } catch (error) {
+        console.error("Failed to copy:", error);
+    }
 });

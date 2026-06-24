@@ -1,0 +1,33 @@
+/* theme.css — make the game your own!
+   Change any value below and the game updates.
+*/
+
+:root {
+    /* ----- COLORS -----
+       Colors can be names like "tomato" or hex codes like "#10E575". */
+    --green: #10E575;              /* color when it's time to tap! */
+    --background: #07111f;         /* page background color */
+    --button-border-color: #8fe8ff; /* border color on the buttons */
+
+    /* ----- FONT -----
+       Pick one of these:
+         "Arial"
+         "Georgia"
+         "Times New Roman"
+         "Courier New"
+         "Trebuchet MS"
+         "Comic Sans MS"
+         "Verdana"
+         "Impact"              */
+    --game-font: "JetBrains Mono";
+
+    /* ----- SPACING -----
+       Controls the padding inside each round result box.
+       Try values like 8px, 16px, or 32px.               */
+    --round-box-padding: 16px;
+
+    /* ----- SHAPE -----
+       Controls how rounded the corners are on result boxes.
+       Try 0px for sharp corners, or 20px for very round ones. */
+    --round-box-radius: 8px;
+}

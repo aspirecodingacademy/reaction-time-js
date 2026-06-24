@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -7,8 +8,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme.css">
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div class="app-container">
         <header class="app-header">
@@ -41,10 +44,30 @@
 
             <section class="state hidden" id="results-state">
                 <div class="stoplight-results">
-                    <!-- TODO 1: Build hero-stats (div with average-time, reaction-percentile, reaction-description) -->
+                    <div class="hero-stats">
+                        <div class="average-time" id="average-time"></div>
+                        <p class="reaction-percentile" id="reaction-percentile"></p>
+                        <p class="reaction-description" id="reaction-description"></p>
+                        <div class="time-range">
+                            <span class="time-range-item">Best: <strong id="best-time"></strong></span>
+                            <span class="time-range-item">Worst: <strong id="worst-time"></strong></span>
+                        </div>
+                    </div>
 
-                    <!-- TODO 2: Build rounds (div with 3 round-box divs, each containing round-label and round-time) -->
-
+                    <div class="rounds">
+                        <div class="round-box">
+                            <div class="round-label">Round 1</div>
+                            <div class="round-time" data-round-time></div>
+                        </div>
+                        <div class="round-box">
+                            <div class="round-label">Round 2</div>
+                            <div class="round-time" data-round-time></div>
+                        </div>
+                        <div class="round-box">
+                            <div class="round-label">Round 3</div>
+                            <div class="round-time" data-round-time></div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="results-actions">
@@ -60,6 +83,11 @@
         </footer>
     </div>
 
-    <script type="module" src="app.js"></script>
+    <!-- Game scripts - order matters! -->
+    <script src="my-lab.js"></script>
+    <script src="messages.js"></script>
+    <script src="math.js"></script>
+    <script src="app.js"></script>
 </body>
+
 </html>
