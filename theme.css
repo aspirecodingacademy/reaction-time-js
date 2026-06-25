@@ -1,16 +1,18 @@
-/* theme.css — make the game your own!
-   Change any value below and the game updates.
-*/
+/* @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap'); */
 
 :root {
     /* ----- COLORS -----
        Colors can be names like "tomato" or hex codes like "#10E575". */
-    --green: #10E575;              /* color when it's time to tap! */
-    --background: #07111f;         /* page background color */
+    --background: #07111f;          /* page background color */
+    --card: rgba(35, 58, 91, 0.82); /* panel / card background color */
+    --text: #f5fbff;                /* main text color */
+    --muted: #9cb7d3;               /* softer text (labels, footer) */
+    --accent: #8fe8ff;              /* highlight text + button glow */
+    --green: #10E575;               /* color when it's time to tap! */
     --button-border-color: #8fe8ff; /* border color on the buttons */
 
     /* ----- FONT -----
-       Pick one of these:
+       Use a custom font (see the top of this file), or pick one of these:
          "Arial"
          "Georgia"
          "Times New Roman"
@@ -19,7 +21,7 @@
          "Comic Sans MS"
          "Verdana"
          "Impact"              */
-    --game-font: "JetBrains Mono";
+    --game-font: "Verdana";
 
     /* ----- SPACING -----
        Controls the padding inside each round result box.

@@ -1,8 +1,5 @@
 :root {
-    --card: rgba(35, 58, 91, 0.82);
-    --text: #f5fbff;
-    --muted: #9cb7d3;
-    --cyan: #8fe8ff;
+    /* Structural colors students don't edit — the editable ones live in theme.css */
     --blue: #5f8dff;
     --red: #FF2A55;
     --wait-gray: #5C6B73;
@@ -182,7 +179,7 @@ h1 {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, var(--cyan), var(--blue));
+    background: linear-gradient(135deg, var(--accent), var(--blue));
     border-radius: 8px;
     opacity: 0;
     transition: opacity 0.4s ease;
@@ -242,7 +239,7 @@ h1 {
 
 .reaction-percentile,
 .reaction-description {
-    color: var(--cyan);
+    color: var(--accent);
     font-size: 1.1rem;
 }
 
@@ -334,7 +331,7 @@ h1 {
 }
 
 .app-footer a {
-    color: var(--cyan);
+    color: var(--accent);
 }
 
 body.playing-mode .app-header,
