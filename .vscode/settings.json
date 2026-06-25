@@ -15,6 +15,12 @@
   "editor.parameterHints.enabled": false,
   "editor.wordBasedSuggestions": "off",
   "editor.tabCompletion": "off",
-"files.exclude": {},
+"files.exclude": {
+    "app.js": true,
+    "index.html": true,
+    "styles.css": true,
+    ".vscode": true,
+    ".claude": true
+  },
 "liveServer.settings.port": 5501
 }
